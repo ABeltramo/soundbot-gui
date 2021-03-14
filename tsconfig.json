@@ -83,5 +83,8 @@
     // Poll files for updates more frequently
     // when they're updated a lot.
     "fallbackPolling": "dynamicPriority"
-  }
+  },
+  "exclude": [
+    "./src/frontend"
+  ]
 }
