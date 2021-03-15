@@ -13,6 +13,18 @@ const schema = {
         type: String,
         default: "http://localhost:3000"
     },
+    SOUNDS_FOLDER: {
+        type: String,
+        default: "./data/sounds"
+    },
+    DB_CLIENT: {
+        type: String,
+        default: "sqlite3"
+    },
+    DB_SQLITE_FILENAME: {
+        type: String,
+        default: "./data/db.sqlite"
+    },
     OAUTH_KEY: String,
     OAUTH_SECRET: String
 };
