@@ -1,9 +1,9 @@
 import grant from "grant";
-import {env} from "./helpers/env";
+import {env} from "../helpers/env";
 import session from 'express-session'
 import express from "express";
 
-export default class DiscordOauth {
+export default class Oauth {
     private oauthMiddleware = grant.express({
         "defaults": {
             "origin": env.ORIGIN,
@@ -14,7 +14,10 @@ export default class DiscordOauth {
             "key": env.OAUTH_KEY,
             "secret": env.OAUTH_SECRET,
             "callback": "/app",
-            "scope": ["bot"]
+            "scope": ["bot"],
+            "custom_params": {
+                "permissions": 3146752 // View Channels + Connect + Speak
+            }
         }
     })
 

@@ -26,7 +26,8 @@ const schema = {
         default: "./data/db.sqlite"
     },
     OAUTH_KEY: String,
-    OAUTH_SECRET: String
+    OAUTH_SECRET: String,
+    BOT_TOKEN: String
 };
 
 export const env = load(schema, "conf.env");

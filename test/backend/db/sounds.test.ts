@@ -2,8 +2,8 @@ import * as sounds from "src/backend/db/sounds"
 import {knex} from "src/backend/db/db"
 
 beforeAll(async () => {
-    await knex.migrate.down()
-    await knex.migrate.up()
+    await knex.migrate.rollback({}, true)
+    await knex.migrate.latest()
     return await knex.seed.run()
 })
 
@@ -45,6 +45,10 @@ test("set and remove sound data", async () => {
 
     await sounds.removeSoundData(sound)
     expect(await sounds.getSounds("GROUP2")).toHaveLength(1)
-    expect(await sounds.getSounds("GROUP2")).toContainEqual({groupId: "GROUP2", filename: "AComplexSound.mp3", name: "A very complex sound"})
+    expect(await sounds.getSounds("GROUP2")).toContainEqual({
+        groupId: "GROUP2",
+        filename: "AComplexSound.mp3",
+        name: "A very complex sound"
+    })
 
 })

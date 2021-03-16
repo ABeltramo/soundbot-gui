@@ -1,20 +1,23 @@
 import express from 'express';
 import {env} from "./helpers/env"
 import {log} from "./helpers/log"
-import DiscordOauth from "./discord-oauth"
+import DiscordOauth from "./discord/oauth"
 import * as path from "path";
 import http from "http";
+import {DiscordBot} from "./discord/bot";
 
 export default class Http {
     private readonly app;
     private readonly server;
     private auth;
+    private bot;
     private frontendPath = path.resolve("./src/frontend/build");
 
-    constructor(auth: DiscordOauth) {
+    constructor(auth: DiscordOauth, bot: DiscordBot) {
         this.app = express();
         this.server = http.createServer(this.app);
         this.auth = auth;
+        this.bot = bot;
 
         // Middlewares
         this.app.use(this.loggerMiddleware)
@@ -56,6 +59,10 @@ export default class Http {
             res.redirect("/")
             return;
         }
+        // @ts-ignore
+        const guildId = req.session.grant?.response.raw.guild.id;
+        this.bot.joinedServer(guildId);
+
         res.sendFile(this.frontendPath + "/index.html");
     }
 
