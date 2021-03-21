@@ -1,4 +1,6 @@
 import {load} from 'ts-dotenv';
+import crypto from "crypto"
+
 
 const schema = {
     LOG_LEVEL: {
@@ -24,6 +26,10 @@ const schema = {
     DB_SQLITE_FILENAME: {
         type: String,
         default: "./data/db.sqlite"
+    },
+    SESSION_SECRET: {
+        type: String,
+        default: crypto.randomBytes(20).toString("hex")
     },
     OAUTH_KEY: String,
     OAUTH_SECRET: String,

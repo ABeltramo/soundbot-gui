@@ -1,6 +1,5 @@
 import grant from "grant";
 import {env} from "../helpers/env";
-import session from 'express-session'
 import express from "express";
 
 export default class Oauth {
@@ -21,18 +20,12 @@ export default class Oauth {
         }
     })
 
-    private sessionMiddleware = session({
-        secret: 'grant',
-        saveUninitialized: true,
-        resave: false
-    })
 
     /**
      * Returns a list of middlewares needed for this Oauth class
      */
     public getMiddlewares() {
         return [
-            this.sessionMiddleware,
             this.oauthMiddleware
         ]
     }

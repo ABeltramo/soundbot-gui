@@ -1,15 +1,26 @@
 import DiscordOauth from "./discord/oauth";
-import Http from "./http";
+import {Http} from "./http";
 import Websocket from "./websocket";
 import {DiscordBot} from "./discord/bot";
-
-const oAuth = new DiscordOauth();
-const bot = new DiscordBot()
-
-const httpServer = new Http(oAuth, bot);
-const wss = new Websocket(httpServer.getServer())
+import "./db/channels"
+import {emitter} from "./events"
+import {log} from "./helpers/log";
+import {env} from "./helpers/env";
 
 
-bot.listen()
+export async function start() {
+    log.info("Loaded env:", env)
+    const oAuth = new DiscordOauth();
+    const bot = new DiscordBot()
 
-httpServer.start()
+    const httpServer = new Http(oAuth);
+    const wss = new Websocket(httpServer)
+
+
+    await bot.listen()
+    await httpServer.start()
+    log.debug("Registered events:", emitter.eventNames())
+}
+
+
+start()

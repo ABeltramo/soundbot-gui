@@ -1,8 +1,9 @@
 import {Channel, Client, VoiceChannel} from "discord.js";
 import {log} from "../helpers/log";
 import {env} from "../helpers/env";
-import * as db from "../db/channels"
+import {ChannelData} from "../db/channels"
 import {SoundData} from "../db/sounds";
+import {emitter} from "../events";
 
 export class DiscordBot {
 
@@ -10,27 +11,31 @@ export class DiscordBot {
         log.info("Discord bot online")
     }).on("channelCreate", async (channel) => {
         if (channel.type === "voice") {
-            log.debug(`channelCreate event: ${channel.id}`)
-            return db.setChannelData(DiscordBot.channelToData(channel))
+            emitter.emit("channel:create", DiscordBot.channelToData(channel))
         }
     }).on("channelDelete", async (channel) => {
         if (channel.type === "voice") {
-            log.debug(`channelDelete event: ${channel.id}`)
-            return db.removeChannelData(DiscordBot.channelToData(channel))
+            emitter.emit("channel:delete", DiscordBot.channelToData(channel))
         }
     }).on("channelUpdate", async (prevChannel, newChannel) => {
         if (prevChannel.type === "voice") {
-            log.debug(`channelUpdate event: ${prevChannel.id} -> ${newChannel.id}`)
-            await db.removeChannelData(DiscordBot.channelToData(prevChannel))
-            return db.setChannelData(DiscordBot.channelToData(newChannel))
+            emitter.emit("channel:update", DiscordBot.channelToData(prevChannel), DiscordBot.channelToData(newChannel))
         }
     })
+
+    constructor() {
+        emitter.on("user:login", (groupId) => {
+            return this.userLogin(groupId)
+        })
+        emitter.on("sound:play", this.play)
+    }
+
 
     public async listen(): Promise<string> {
         return this.client.login(env.BOT_TOKEN)
     }
 
-    private static channelToData(channel: Channel): db.ChannelData {
+    private static channelToData(channel: Channel): ChannelData {
         const ch = channel as VoiceChannel
         return {
             channelId: ch.id,
@@ -43,8 +48,8 @@ export class DiscordBot {
      * On server join we fetch and locally save a list of all the voice channel available
      * only if this is not cached already
      */
-    public async joinedServer(groupId: string): Promise<db.ChannelData[] | false> {
-        const channels = await this.getVoiceChannels(groupId)
+    public async userLogin(groupId: string): Promise<ChannelData[] | false> {
+        const [, channels] = await emitter.emitAsync("channel:get:by-group", groupId)
         if (channels.length === 0) {
             return this.refreshChannelsList(groupId)
         } else {
@@ -52,14 +57,10 @@ export class DiscordBot {
         }
     }
 
-    public async getVoiceChannels(groupId: string): Promise<db.ChannelData[]> {
-        return db.getChannels(groupId)
-    }
-
     /**
      * Start playing given sound in the selected channel
      */
-    public async play(sound: SoundData, channel: db.ChannelData) {
+    public async play(sound: SoundData, channel: ChannelData) {
         const discordChannel = await this.client.channels.fetch(channel.channelId) as VoiceChannel
         const connection = await discordChannel.join()
         return connection.play(sound.filename)
@@ -68,7 +69,7 @@ export class DiscordBot {
     /**
      * Delete local cache and fetch channel list from Discord
      */
-    public async refreshChannelsList(groupId: string): Promise<db.ChannelData[] | false> {
+    public async refreshChannelsList(groupId: string): Promise<ChannelData[] | false> {
         let guild;
 
         try {
@@ -81,15 +82,16 @@ export class DiscordBot {
         const channels = guild.channels.cache
         const voiceChannels = channels.filter((channel) => channel.type === "voice" && !channel.deleted)
         if (voiceChannels.size > 0) { // Only delete and refresh if we are able to fetch something
-            await db.removeAllChannels(groupId)
+            await emitter.emitAsync("channel:delete:all", groupId)
             const addedChannels = voiceChannels.map(async (channel) => {
-                const channelData: db.ChannelData = {
+                const channelData: ChannelData = {
                     channelId: channel.id,
                     groupId: channel.guild.id,
                     name: channel.name
                 }
-                if (!await db.getChannelData(groupId, channelData.channelId)) {
-                    await db.setChannelData(channelData)
+                const [, channelExist] = await emitter.emitAsync("channel:get:by-channel", groupId, channelData.channelId)
+                if (!channelExist) {
+                    await emitter.emitAsync("channel:create", channelData)
                 }
                 return channelData
             })

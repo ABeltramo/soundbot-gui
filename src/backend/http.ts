@@ -4,23 +4,28 @@ import {log} from "./helpers/log"
 import DiscordOauth from "./discord/oauth"
 import * as path from "path";
 import http from "http";
-import {DiscordBot} from "./discord/bot";
+import {emitter} from "./events";
+import session from "express-session";
 
-export default class Http {
+export class Http {
     private readonly app;
     private readonly server;
     private auth;
-    private bot;
     private frontendPath = path.resolve("./src/frontend/build");
+    public httpsession = session({
+        secret: env.SESSION_SECRET,
+        saveUninitialized: true,
+        resave: false
+    })
 
-    constructor(auth: DiscordOauth, bot: DiscordBot) {
+    constructor(auth: DiscordOauth) {
         this.app = express();
         this.server = http.createServer(this.app);
         this.auth = auth;
-        this.bot = bot;
 
         // Middlewares
         this.app.use(this.loggerMiddleware)
+        this.app.use(this.httpsession)
         this.app.use(auth.getMiddlewares())
         this.app.use(express.static(this.frontendPath, {index: false}));
 
@@ -35,13 +40,13 @@ export default class Http {
 
     start() {
         this.server.listen(env.PORT, () => {
-            log.info(`Running on http://localhost:${env.PORT} with the following env:`, env);
+            log.info(`Running on http://localhost:${env.PORT}`);
         });
         return this.server;
     }
 
     loggerMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
-        log.debug(`Received: ${req.method} on ${req.url}`)
+        log.silly(`Received: ${req.method} on ${req.url}`)
         next()
     }
 
@@ -61,7 +66,9 @@ export default class Http {
         }
         // @ts-ignore
         const guildId = req.session.grant?.response.raw.guild.id;
-        this.bot.joinedServer(guildId);
+        emitter.emit("user:login", guildId);
+        // @ts-ignore
+        req.session.groupId = guildId
 
         res.sendFile(this.frontendPath + "/index.html");
     }
