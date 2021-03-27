@@ -2,6 +2,22 @@ import grant from "grant";
 import {env} from "../helpers/env";
 import express from "express";
 
+declare module "express-session" {
+    interface Session {
+        groupID?: string,
+        grant?: {
+            response?: {
+                error?: string,
+                raw?: {
+                    guild?: {
+                        id?: string
+                    }
+                }
+            }
+        }
+    }
+}
+
 export default class Oauth {
     private oauthMiddleware = grant.express({
         "defaults": {
@@ -37,12 +53,17 @@ export default class Oauth {
         res.redirect("/connect/discord/")
     }
 
-    /**
-     * Returns true if the current session contains a logged user
-     */
-    public logged(req: express.Request): boolean {
-        // @ts-ignore
-        return req.session?.grant && req.session.grant?.response && req.session.grant?.response?.error === undefined;
+    public getGroupID(req: express.Request): string | undefined {
+        if (req.session?.groupID) {
+            return req.session.groupID
+        }
+        const first_login = req.session?.grant?.response?.error === undefined
+        if (first_login) {
+            const groupId = req.session?.grant?.response?.raw?.guild?.id;
+            req.session.groupID = groupId
+            req.session.grant = undefined
+            return groupId
+        }
     }
 
 }

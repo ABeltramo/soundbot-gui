@@ -1,11 +1,6 @@
 import {knex} from "./db"
 import {emitter} from "../events";
-
-export type ChannelData = {
-    groupId: string,
-    channelId: string,
-    name: string,
-}
+import {ChannelData} from "../../common/channelInterface";
 
 emitter.on("channel:create", setChannelData)
 emitter.on("channel:delete", removeChannelData)

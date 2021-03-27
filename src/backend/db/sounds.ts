@@ -1,10 +1,11 @@
 import {knex} from "./db"
+import {SoundData} from "../../common/soundInterface";
+import {emitter} from "../events";
 
-export type SoundData = {
-    groupId: string,
-    filename: string,
-    name: string
-}
+emitter.on("sounds:create", setSoundData)
+emitter.on("sounds:get:by-group", getSounds)
+emitter.on("sounds:get:by-filename", getSoundData)
+emitter.on("sounds:remove", removeSoundData)
 
 export async function getSounds(groupId: string): Promise<SoundData[]> {
     return knex<SoundData>('sounds')

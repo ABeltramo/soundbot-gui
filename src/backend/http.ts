@@ -4,18 +4,29 @@ import {log} from "./helpers/log"
 import DiscordOauth from "./discord/oauth"
 import * as path from "path";
 import http from "http";
-import {emitter} from "./events";
 import session from "express-session";
+import connect_session_knex from "connect-session-knex";
+import {knex} from "./db/db";
+import {emitter} from "./events";
+
+const KnexSessionStore = connect_session_knex(session);
 
 export class Http {
     private readonly app;
     private readonly server;
     private auth;
     private frontendPath = path.resolve("./src/frontend/build");
+
+    private store = new KnexSessionStore({
+        // @ts-ignore
+        knex: knex
+    })
     public httpsession = session({
         secret: env.SESSION_SECRET,
         saveUninitialized: true,
-        resave: false
+        resave: true,
+        store: this.store,
+        cookie: {maxAge: 7 * 24 * 60 * 60 * 1000} // 1 week
     })
 
     constructor(auth: DiscordOauth) {
@@ -51,7 +62,7 @@ export class Http {
     }
 
     home = (req: express.Request, res: express.Response) => {
-        if (!this.auth.logged(req)) {
+        if (!this.auth.getGroupID(req)) {
             this.auth.startAuth(req, res)
         } else {
             res.redirect("/app")
@@ -59,17 +70,13 @@ export class Http {
     }
 
     authorized = (req: express.Request, res: express.Response) => {
-        if (!this.auth.logged(req)) {
+        const groupId = this.auth.getGroupID(req)
+        if (!groupId) {
             log.warn("Access denied, ip:", req.ip)
             res.redirect("/")
             return;
         }
-        // @ts-ignore
-        const guildId = req.session.grant?.response.raw.guild.id;
-        emitter.emit("user:login", guildId);
-        // @ts-ignore
-        req.session.groupId = guildId
-
+        emitter.emit("user:login", groupId);
         res.sendFile(this.frontendPath + "/index.html");
     }
 

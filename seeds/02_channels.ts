@@ -10,4 +10,4 @@ export async function seed(knex: Knex): Promise<void> {
         {id: 2, name: "Voice channel 2", channelId: "000000", groupId: "0123ABC"},
         {id: 3, name: "Vox populi", channelId: "999", groupId: "GROUP2"},
     ]);
-};
+}

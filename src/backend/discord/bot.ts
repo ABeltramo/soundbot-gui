@@ -1,9 +1,10 @@
 import {Channel, Client, VoiceChannel} from "discord.js";
 import {log} from "../helpers/log";
 import {env} from "../helpers/env";
-import {ChannelData} from "../db/channels"
-import {SoundData} from "../db/sounds";
+import {ChannelData} from "../../common/channelInterface";
+import {SoundData} from "../../common/soundInterface";
 import {emitter} from "../events";
+import {getSoundFile} from "../sounds";
 
 export class DiscordBot {
 
@@ -27,7 +28,10 @@ export class DiscordBot {
         emitter.on("user:login", (groupId) => {
             return this.userLogin(groupId)
         })
-        emitter.on("sound:play", this.play)
+
+        emitter.on("sound:play", async (sound, channel) => {
+            return this.play(sound, channel)
+        })
     }
 
 
@@ -63,7 +67,11 @@ export class DiscordBot {
     public async play(sound: SoundData, channel: ChannelData) {
         const discordChannel = await this.client.channels.fetch(channel.channelId) as VoiceChannel
         const connection = await discordChannel.join()
-        return connection.play(sound.filename)
+        const stream = connection.play(getSoundFile(sound))
+        stream.on("error", log.error)
+        stream.on("finish", () => {
+            connection.disconnect()
+        })
     }
 
     /**

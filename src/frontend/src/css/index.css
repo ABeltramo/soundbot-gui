@@ -1,0 +1,22 @@
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    height: 100%;
+}
+
+button {
+    cursor: pointer;
+    outline-style: none;
+    box-shadow: none;
+    border-color: transparent;
+}
+
