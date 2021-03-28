@@ -4,7 +4,7 @@
   "description": "A soundboard bot",
   "main": "app.js",
   "scripts": {
-    "start": "npx tsc && node dist/app.js",
+    "start": "node dist/app.js",
     "build": "npx tsc --removeComments --sourceMap false",
     "watch": "npx ts-node-dev src/backend/app.ts",
     "test": "npx jest --runInBand"
@@ -43,6 +43,7 @@
     "express-session": "^1.17.1",
     "grant": "^5.4.10",
     "knex": "^0.95.2",
+    "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
     "socket.io": "^4.0.0",
     "sodium": "^3.0.2",

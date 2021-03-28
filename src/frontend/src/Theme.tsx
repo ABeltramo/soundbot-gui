@@ -1,11 +1,12 @@
-import {Theme, ThemeProvider, useColorMode, merge, Button} from 'theme-ui'
+import {Theme, useColorMode, merge, Button} from 'theme-ui'
+import {ThemeProvider} from '@theme-ui/theme-provider'
 import base_theme from '@theme-ui/preset-base'
 import React from "react";
 import PropTypes from 'prop-types';
 
 
 export const ThemeSelector = () => {
-    const modes = ['discord', 'deep', 'light']
+    const modes = ['dark', 'deep', 'light']
     const [mode, setMode] = useColorMode()
 
     function nextTheme() {
@@ -55,7 +56,7 @@ class ThemeComponent
             {
                 colors: {
                     modes: {
-                        discord: discord_colors,
+                        dark: discord_colors,
                         deep: deep_colors
                     }
                 }

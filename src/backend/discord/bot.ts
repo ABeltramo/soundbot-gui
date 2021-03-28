@@ -4,7 +4,6 @@ import {env} from "../helpers/env";
 import {ChannelData} from "../../common/channelInterface";
 import {SoundData} from "../../common/soundInterface";
 import {emitter} from "../events";
-import {getSoundFile} from "../sounds";
 
 export class DiscordBot {
 
@@ -67,7 +66,8 @@ export class DiscordBot {
     public async play(sound: SoundData, channel: ChannelData) {
         const discordChannel = await this.client.channels.fetch(channel.channelId) as VoiceChannel
         const connection = await discordChannel.join()
-        const stream = connection.play(getSoundFile(sound))
+        const [, soundFile] = await emitter.emitAsync("sounds:get:sound-file", sound)
+        const stream = connection.play(soundFile)
         stream.on("error", log.error)
         stream.on("finish", () => {
             connection.disconnect()

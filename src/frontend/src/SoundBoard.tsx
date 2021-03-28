@@ -29,9 +29,7 @@ const SongBox = (props: SoundData) => {
 const SoundBoard = () => {
     const socket = useContext(SocketContext)
     const [songs, setSongs] = useState([])
-    const handleSongsRetrieved = useCallback((retrieved_songs) => {
-        setSongs(retrieved_songs)
-    }, [])
+    const handleSongsRetrieved = useCallback(setSongs, [])
 
     useEffect(() => {
         socket.emit("songs:get?", {})

@@ -7,9 +7,14 @@ import {ChannelData} from "../../common/channelInterface";
 import {ChannelContext} from "./context/channel";
 
 const ChannelSelector = () => {
+    const {channelID, setSelectedChannel} = useContext(ChannelContext);
+
     const socket = useContext(SocketContext)
     const [channels, setChannels] = useState([])
-    const handleChannelsRetrieved = useCallback(setChannels, [])
+    const handleChannelsRetrieved = useCallback((retrieved_channels) => {
+        setSelectedChannel(retrieved_channels[0]['channelId'])
+        setChannels(retrieved_channels)
+    }, [])
 
     useEffect(() => {
         socket.emit("channels:get?", {})
@@ -19,7 +24,6 @@ const ChannelSelector = () => {
         }
     }, [socket])
 
-    const {channelID, setSelectedChannel} = useContext(ChannelContext);
 
     return (
         <Select

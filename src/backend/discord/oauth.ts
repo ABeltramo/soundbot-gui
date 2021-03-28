@@ -30,9 +30,6 @@ export default class Oauth {
             "secret": env.OAUTH_SECRET,
             "callback": "/app",
             "scope": ["bot"],
-            "custom_params": {
-                "permissions": 3146752 // View Channels + Connect + Speak
-            }
         }
     })
 

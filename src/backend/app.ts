@@ -4,6 +4,7 @@ import Websocket from "./websocket";
 import {DiscordBot} from "./discord/bot";
 import "./db/channels"
 import "./db/sounds"
+import "./sounds"
 import {emitter} from "./events"
 import {log} from "./helpers/log";
 import {env} from "./helpers/env";

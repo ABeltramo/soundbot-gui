@@ -1,0 +1,16 @@
+# Start by removing everything and add just the things we need
+*
+
+# Things to be included
+!src
+!migrations
+!seeds
+!package.json
+!package-lock.json
+!tsconfig.json
+!.eslintignore
+!.eslintrc.js
+
+# Frontend stuff
+src/frontend/node_modules
+src/frontend/build
