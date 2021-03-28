@@ -20,12 +20,29 @@ const schema = {
         default: "./data/sounds"
     },
     DB_CLIENT: {
-        type: String,
+        type: ["mysql", "sqlite3"],
         default: "sqlite3"
     },
     DB_SQLITE_FILENAME: {
+        optional: true,
         type: String,
         default: "./data/db.sqlite"
+    },
+    DB_MYSQL_HOST: {
+        optional: true,
+        type: String,
+    },
+    DB_MYSQL_USER: {
+        optional: true,
+        type: String,
+    },
+    DB_MYSQL_PASSWORD: {
+        optional: true,
+        type: String,
+    },
+    DB_MYSQL_DATABASE: {
+        optional: true,
+        type: String,
     },
     SESSION_SECRET: {
         type: String,
