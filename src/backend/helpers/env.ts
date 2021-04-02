@@ -20,7 +20,7 @@ const schema = {
         default: "./data/sounds"
     },
     DB_CLIENT: {
-        type: ["mysql", "sqlite3"],
+        type: ["mysql2", "sqlite3"],
         default: "sqlite3"
     },
     DB_SQLITE_FILENAME: {
@@ -50,7 +50,11 @@ const schema = {
     },
     OAUTH_KEY: String,
     OAUTH_SECRET: String,
-    BOT_TOKEN: String
+    BOT_TOKEN: String,
+    BOT_CHANNEL_LEAVE_TIMEOUT: {
+        type: Number,
+        default: 10 * 1000 // defaults to 10 seconds
+    }
 };
 
 export const env = load(schema, "conf.env");

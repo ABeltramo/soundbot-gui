@@ -1,35 +1,48 @@
-import {Channel, Client, VoiceChannel} from "discord.js";
+import {Channel, Client, VoiceChannel, VoiceConnection} from "discord.js";
 import {log} from "../helpers/log";
 import {env} from "../helpers/env";
 import {ChannelData} from "../../common/channelInterface";
 import {SoundData} from "../../common/soundInterface";
 import {emitter} from "../events";
+import {GroupData} from "../../common/serverInterface";
 
 export class DiscordBot {
 
-    private client = new Client().on('ready', () => {
-        log.info("Discord bot online")
-    }).on("channelCreate", async (channel) => {
-        if (channel.type === "voice") {
-            emitter.emit("channel:create", DiscordBot.channelToData(channel))
-        }
-    }).on("channelDelete", async (channel) => {
-        if (channel.type === "voice") {
-            emitter.emit("channel:delete", DiscordBot.channelToData(channel))
-        }
-    }).on("channelUpdate", async (prevChannel, newChannel) => {
-        if (prevChannel.type === "voice") {
-            emitter.emit("channel:update", DiscordBot.channelToData(prevChannel), DiscordBot.channelToData(newChannel))
-        }
-    })
+    private cache: Map<string, VoiceConnection> = new Map()
+    private client = new Client()
 
     constructor() {
-        emitter.on("user:login", (groupId) => {
-            return this.userLogin(groupId)
+        this.client.on('ready', () => {
+            log.info("Discord bot online")
+        }).on("channelCreate", async (channel) => {
+            if (channel.type === "voice") {
+                emitter.emit("channel:create", DiscordBot.channelToData(channel))
+            }
+        }).on("channelDelete", async (channel) => {
+            if (channel.type === "voice") {
+                emitter.emit("channel:delete", DiscordBot.channelToData(channel))
+            }
+        }).on("channelUpdate", async (prevChannel, newChannel) => {
+            if (prevChannel.type === "voice") {
+                emitter.emit("channel:update", DiscordBot.channelToData(prevChannel), DiscordBot.channelToData(newChannel))
+            }
+        }).on("debug", (e) => log.silly(e))
+            .on("warn", (e) => log.warn(e))
+            .on("error", (e) => log.error(e))
+
+        emitter.on("servers:selected", (groupData) => {
+            return this.onSelectedGroup(groupData)
         })
 
         emitter.on("sound:play", async (sound, channel) => {
             return this.play(sound, channel)
+        })
+
+        emitter.on("bot:leave", (channelData: ChannelData) => {
+            const channel = this.cache.get(channelData.groupId)
+            if (channel) {
+                channel.disconnect()
+            }
         })
     }
 
@@ -48,10 +61,10 @@ export class DiscordBot {
     }
 
     /**
-     * On server join we fetch and locally save a list of all the voice channel available
+     * On group selection we fetch and locally save a list of all the voice channel available
      * only if this is not cached already
      */
-    public async userLogin(groupId: string): Promise<ChannelData[] | false> {
+    public async onSelectedGroup({groupId}: GroupData): Promise<ChannelData[] | false> {
         const [, channels] = await emitter.emitAsync("channel:get:by-group", groupId)
         if (channels.length === 0) {
             return this.refreshChannelsList(groupId)
@@ -64,14 +77,48 @@ export class DiscordBot {
      * Start playing given sound in the selected channel
      */
     public async play(sound: SoundData, channel: ChannelData) {
-        const discordChannel = await this.client.channels.fetch(channel.channelId) as VoiceChannel
-        const connection = await discordChannel.join()
-        const [, soundFile] = await emitter.emitAsync("sounds:get:sound-file", sound)
-        const stream = connection.play(soundFile)
-        stream.on("error", log.error)
-        stream.on("finish", () => {
-            connection.disconnect()
+        const connection = await this.getConnection(channel).catch((error) => {
+            log.warn(`Unable to get connection for channel, message: ${error.message}`, channel)
         })
+        if (connection) {
+            const [, soundFile] = await emitter.emitAsync("sounds:get:sound-file", sound)
+
+            const stream = connection.play(soundFile)
+
+            stream.on("error", log.error)
+            stream.on("finish", () => {
+                emitter.emit("sound:finished", sound, channel)
+            })
+        }
+    }
+
+    private async getConnection(channel: ChannelData): Promise<VoiceConnection> {
+        const connection = this.cache.get(channel.groupId)
+        if (!connection) {
+            return this.channelConnect(channel)
+        } else {
+            if (connection.channel.id === channel.channelId) {
+                return connection
+            } else {
+                this.cache.delete(channel.groupId)
+                return this.channelConnect(channel)
+            }
+        }
+    }
+
+    private async channelConnect(channel: ChannelData): Promise<VoiceConnection> {
+        log.debug("Connecting to channel: ", channel.channelId)
+
+        const discordChannel = await this.client.channels.fetch(channel.channelId) as VoiceChannel
+        const newConnection = await discordChannel.join()
+
+        newConnection.on("closing", () => {
+            this.cache.delete(channel.groupId)
+            log.debug("Disconnecting from channel: ", channel.channelId)
+        })
+
+        this.cache.set(channel.groupId, newConnection)
+        return newConnection
     }
 
     /**

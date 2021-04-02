@@ -1,11 +1,11 @@
-import {Theme, useColorMode, merge, Button} from 'theme-ui'
+import {Theme, useColorMode, merge, Button, ButtonProps} from 'theme-ui'
 import {ThemeProvider} from '@theme-ui/theme-provider'
 import base_theme from '@theme-ui/preset-base'
 import React from "react";
 import PropTypes from 'prop-types';
 
 
-export const ThemeSelector = () => {
+export const ThemeSelector = (props: ButtonProps) => {
     const modes = ['dark', 'deep', 'light']
     const [mode, setMode] = useColorMode()
 
@@ -17,6 +17,7 @@ export const ThemeSelector = () => {
 
     return (
         <Button
+            {...props}
             p={2}
             onClick={nextTheme}>
             {mode}
@@ -28,7 +29,7 @@ const discord_colors = {
     text: '#fff',
     background: '#303237',
     primary: '#7085d3',
-    secondary: '#43af7e',
+    secondary: '#4766dd',
     accent: '#660099',
     muted: '#35393e',
 }
@@ -36,12 +37,10 @@ const discord_colors = {
 const deep_colors = {
     background: "hsl(230, 25%, 18%)",
     gray: "hsl(210, 50%, 60%)",
-    highlight: "hsl(260, 20%, 40%)",
-    muted: "hsl(260, 20%, 40%)",
-    primary: "hsl(260, 100%, 80%)",
-    purple: "hsl(290, 100%, 80%)",
-    secondary: "hsl(290, 100%, 80%)",
-    text: "hsl(230, 25%, 18%)"
+    muted: "hsl(231,25%,21%)",
+    primary: "hsl(261,55%,67%)",
+    secondary: "hsl(267,32%,42%)",
+    text: "#fff"
 }
 
 class ThemeComponent
@@ -54,6 +53,29 @@ class ThemeComponent
     render() {
         const full_theme = merge(base_theme as Theme,
             {
+                buttons: {
+                    secondary: {
+                        bg: "secondary"
+                    },
+                    threeD: {
+                        border: theme => `1px solid ${theme.colors?.text}`,
+                        boxShadow: theme => `-3px 3px ${theme.colors?.secondary}`,
+                        transition: "all .10s ease-out",
+                        top: 0,
+                        left: 0,
+                        position: "relative",
+                        '&:active': {
+                            left: "-3px",
+                            top: "3px",
+                            boxShadow: "none"
+                        }
+                    },
+                    outlined: {
+                        bg: "transparent",
+                        color: "text",
+                        border: theme => `1px solid ${theme.colors?.text}`
+                    }
+                },
                 colors: {
                     modes: {
                         dark: discord_colors,

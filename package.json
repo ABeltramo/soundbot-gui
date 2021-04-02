@@ -41,6 +41,7 @@
     "eventemitter2": "^6.4.4",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "got": "^11.8.2",
     "grant": "^5.4.10",
     "knex": "^0.95.2",
     "mysql2": "^2.2.5",

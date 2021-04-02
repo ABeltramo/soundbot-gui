@@ -4,7 +4,8 @@ import Websocket from "./websocket";
 import {DiscordBot} from "./discord/bot";
 import "./db/channels"
 import "./db/sounds"
-import "./sounds"
+import "./sound-files"
+import "./sound-queue"
 import {emitter} from "./events"
 import {log} from "./helpers/log";
 import {env} from "./helpers/env";
@@ -16,7 +17,7 @@ export async function start() {
     const bot = new DiscordBot()
 
     const httpServer = new Http(oAuth);
-    const wss = new Websocket(httpServer)
+    const wss = new Websocket(httpServer, oAuth)
 
 
     await bot.listen()

@@ -4,9 +4,10 @@ import * as path from "path";
 import {SoundData} from "../common/soundInterface";
 import {emitter} from "./events";
 import {log} from "./helpers/log";
+import {GroupData} from "../common/serverInterface";
 
 emitter.on("sounds:get:sound-file", getSoundFile)
-emitter.on("user:login", initAndImportSoundFiles)
+emitter.on("servers:selected", initAndImportSoundFiles)
 
 const baseFolder = path.resolve(env.SOUNDS_FOLDER);
 
@@ -17,7 +18,7 @@ export function getSoundFile({groupId, filename}: SoundData): string {
 /**
  *  Will setup the sound folder if not present and import all from the folder if not present in the db already
  */
-export async function initAndImportSoundFiles(groupId: string) {
+export async function initAndImportSoundFiles({groupId}: GroupData) {
     const baseIdPath = path.join(baseFolder, groupId)
     if (!fs.existsSync(baseIdPath)) {
         fs.mkdirSync(baseIdPath, {recursive: true});

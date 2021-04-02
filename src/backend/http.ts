@@ -61,22 +61,22 @@ export class Http {
         next()
     }
 
-    home = (req: express.Request, res: express.Response) => {
-        if (!this.auth.getGroupID(req)) {
-            this.auth.startAuth(req, res)
+    home = async (req: express.Request, res: express.Response) => {
+        const groups = await this.auth.getServers(req.session)
+        if (!groups) {
+            res.redirect(this.auth.authEndpoint())
         } else {
             res.redirect("/app")
         }
     }
 
-    authorized = (req: express.Request, res: express.Response) => {
-        const groupId = this.auth.getGroupID(req)
-        if (!groupId) {
+    authorized = async (req: express.Request, res: express.Response) => {
+        const servers = await this.auth.getServers(req.session)
+        if (!servers) {
             log.warn("Access denied, ip:", req.ip)
             res.redirect("/")
             return;
         }
-        emitter.emit("user:login", groupId);
         res.sendFile(this.frontendPath + "/index.html");
     }
 

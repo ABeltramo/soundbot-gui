@@ -6,6 +6,7 @@ emitter.on("sounds:create", setSoundData)
 emitter.on("sounds:get:by-group", getSounds)
 emitter.on("sounds:get:by-filename", getSoundData)
 emitter.on("sounds:remove", removeSoundData)
+emitter.on("sounds:update", updateSoundData)
 
 export async function getSounds(groupId: string): Promise<SoundData[]> {
     return knex<SoundData>('sounds')
@@ -32,4 +33,12 @@ export async function removeSoundData(sound: SoundData) {
         .where("groupId", sound.groupId)
         .andWhere("filename", sound.filename)
         .delete()
+}
+
+export async function updateSoundData(sound: SoundData, updated: SoundData) {
+    await knex<SoundData>('sounds')
+        .where('groupId', sound.groupId)
+        .andWhere("filename", sound.filename)
+        .update(updated)
+    return updated
 }

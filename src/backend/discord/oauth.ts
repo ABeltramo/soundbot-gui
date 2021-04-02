@@ -1,17 +1,27 @@
 import grant from "grant";
 import {env} from "../helpers/env";
-import express from "express";
+import {GroupData} from "../../common/serverInterface";
+import got, {OptionsOfJSONResponseBody} from "got";
+import {Session} from "express-session";
+
+interface Guild {
+    id: string,
+    name: string,
+    icon: string,
+    owner: boolean,
+    permissions: string,
+    features: string[]
+}
 
 declare module "express-session" {
     interface Session {
-        groupID?: string,
+        groups?: GroupData[]
         grant?: {
             response?: {
                 error?: string,
                 raw?: {
-                    guild?: {
-                        id?: string
-                    }
+                    access_token: string
+                    token_type: string
                 }
             }
         }
@@ -29,7 +39,12 @@ export default class Oauth {
             "key": env.OAUTH_KEY,
             "secret": env.OAUTH_SECRET,
             "callback": "/app",
-            "scope": ["bot"],
+            "scope": ["guilds"],
+            "overrides": {
+                "bot": {
+                    "scope": ["bot"]
+                }
+            }
         }
     })
 
@@ -46,21 +61,35 @@ export default class Oauth {
     /**
      * Starts authentication process
      */
-    public startAuth(req: express.Request, res: express.Response) {
-        res.redirect("/connect/discord/")
+    public authEndpoint() {
+        return "/connect/discord/"
     }
 
-    public getGroupID(req: express.Request): string | undefined {
-        if (req.session?.groupID) {
-            return req.session.groupID
-        }
-        const first_login = req.session?.grant?.response?.error === undefined
-        if (first_login) {
-            const groupId = req.session?.grant?.response?.raw?.guild?.id;
-            req.session.groupID = groupId
-            req.session.grant = undefined
-            return groupId
+    public async getServers(session: Session): Promise<GroupData[] | undefined> {
+        const auth = session.grant?.response?.raw
+        const cachedGuilds = session.groups
+        if (cachedGuilds) {
+            return cachedGuilds
+        } else if (!auth) {
+            return undefined
+        } else {
+            const opts: OptionsOfJSONResponseBody = {
+                headers: {
+                    "Authorization": auth.token_type + " " + auth.access_token
+                },
+                responseType: 'json'
+            }
+            const response = await got.get("https://discord.com/api/v8/users/@me/guilds", opts)
+            const guilds = response.body as Guild[]
+            const servers = guilds.map(guild => {
+                return {
+                    groupId: guild.id,
+                    groupName: guild.name,
+                    icon: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : undefined
+                }
+            })
+            session.groups = servers // save back into session
+            return servers
         }
     }
-
 }
