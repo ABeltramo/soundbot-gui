@@ -6,7 +6,7 @@ const connections = {
     "sqlite3": {
         filename: env.DB_SQLITE_FILENAME
     },
-    "mysql": {
+    "mysql2": {
         host: env.DB_MYSQL_HOST,
         user: env.DB_MYSQL_USER,
         password: env.DB_MYSQL_PASSWORD,
