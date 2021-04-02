@@ -30,8 +30,8 @@ export class DiscordBot {
             .on("warn", (e) => log.warn(e))
             .on("error", (e) => log.error(e))
 
-        emitter.on("servers:selected", (groupData) => {
-            return this.onSelectedGroup(groupData)
+        emitter.on("servers:joined", (groupData) => {
+            return this.onServerJoined(groupData)
         })
 
         emitter.on("sound:play", async (sound, channel) => {
@@ -64,7 +64,7 @@ export class DiscordBot {
      * On group selection we fetch and locally save a list of all the voice channel available
      * only if this is not cached already
      */
-    public async onSelectedGroup({groupId}: GroupData): Promise<ChannelData[] | false> {
+    public async onServerJoined({groupId}: GroupData): Promise<ChannelData[] | false> {
         const [, channels] = await emitter.emitAsync("channel:get:by-group", groupId)
         if (channels.length === 0) {
             return this.refreshChannelsList(groupId)

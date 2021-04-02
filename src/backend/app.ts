@@ -9,21 +9,22 @@ import "./sound-queue"
 import {emitter} from "./events"
 import {log} from "./helpers/log";
 import {env} from "./helpers/env";
+import {knex} from "./db/db";
 
+async function start() {
+    log.info("Applying DB migrations")
+    await knex.migrate.latest()
 
-export async function start() {
     log.info("Loaded env:", env)
     const oAuth = new DiscordOauth();
     const bot = new DiscordBot()
 
     const httpServer = new Http(oAuth);
-    const wss = new Websocket(httpServer, oAuth)
-
+    new Websocket(httpServer, oAuth)
 
     await bot.listen()
     await httpServer.start()
     log.debug("Registered events:", emitter.eventNames())
 }
-
 
 start()

@@ -48,6 +48,10 @@ const schema = {
         type: String,
         default: crypto.randomBytes(20).toString("hex")
     },
+    COOKIE_DURATION_MINUTES: {
+        type: Number,
+        default: 7 * 24 * 60 // a week
+    },
     OAUTH_KEY: String,
     OAUTH_SECRET: String,
     BOT_TOKEN: String,

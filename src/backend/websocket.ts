@@ -50,9 +50,6 @@ export default class Websocket {
 
         ws.on("servers:select!", (group: ResolvedGroup) => {
             Websocket.setSelectedGroupId(ws, group.groupId)
-            if (group.groupId) {
-                emitter.emit("servers:selected", group)
-            }
         })
 
         ws.on("songs:get?", async () => {

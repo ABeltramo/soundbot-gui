@@ -26,7 +26,7 @@ export class Http {
         saveUninitialized: true,
         resave: true,
         store: this.store,
-        cookie: {maxAge: 7 * 24 * 60 * 60 * 1000} // 1 week
+        cookie: {maxAge: env.COOKIE_DURATION_MINUTES * 60 * 1000}
     })
 
     constructor(auth: DiscordOauth) {
@@ -43,6 +43,7 @@ export class Http {
         // Routes
         this.app.get("/", this.home)
         this.app.get("/app", this.authorized)
+        this.app.get("/joined-server", this.serverJoined)
     }
 
     getServer() {
@@ -80,4 +81,13 @@ export class Http {
         res.sendFile(this.frontendPath + "/index.html");
     }
 
+    serverJoined = (req: express.Request, res: express.Response) => {
+        const groupId = this.auth.getJoinedServerID(req.session)
+        if (groupId) {
+            emitter.emit("servers:joined", {groupId})
+            res.redirect("/app")
+        } else {
+            res.redirect("/")
+        }
+    }
 }

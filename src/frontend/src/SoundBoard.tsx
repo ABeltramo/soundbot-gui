@@ -3,7 +3,6 @@ import React, {useCallback, useContext, useEffect, useState} from "react";
 import {SoundData} from "../../common/soundInterface";
 import {SocketContext} from "./context/socket";
 import {ChannelContext} from "./context/channel";
-import {runInNewContext} from "vm";
 import {UIContext} from "./context/ui";
 
 interface SongElement {

@@ -7,7 +7,7 @@ import Theme from './Theme'
 import StatusBar from "./StatusBar";
 import {UIContext} from "./context/ui";
 import ServerSelector from "./ServerSelector";
-import {GroupData, ResolvedGroup} from "../../common/serverInterface";
+import {ResolvedGroup} from "../../common/serverInterface";
 
 
 const App = () => {

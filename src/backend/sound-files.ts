@@ -7,7 +7,7 @@ import {log} from "./helpers/log";
 import {GroupData} from "../common/serverInterface";
 
 emitter.on("sounds:get:sound-file", getSoundFile)
-emitter.on("servers:selected", initAndImportSoundFiles)
+emitter.on("servers:joined", initAndImportSoundFiles)
 
 const baseFolder = path.resolve(env.SOUNDS_FOLDER);
 

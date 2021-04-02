@@ -3,6 +3,7 @@ import {env} from "../helpers/env";
 import {GroupData} from "../../common/serverInterface";
 import got, {OptionsOfJSONResponseBody} from "got";
 import {Session} from "express-session";
+import {log} from "../helpers/log";
 
 interface Guild {
     id: string,
@@ -20,8 +21,11 @@ declare module "express-session" {
             response?: {
                 error?: string,
                 raw?: {
-                    access_token: string
-                    token_type: string
+                    access_token?: string
+                    token_type?: string
+                    guild?: {
+                        id?: string
+                    }
                 }
             }
         }
@@ -42,7 +46,8 @@ export default class Oauth {
             "scope": ["guilds"],
             "overrides": {
                 "bot": {
-                    "scope": ["bot"]
+                    "scope": ["bot"],
+                    "callback": "/joined-server"
                 }
             }
         }
@@ -90,6 +95,17 @@ export default class Oauth {
             })
             session.groups = servers // save back into session
             return servers
+        }
+    }
+
+    public getJoinedServerID(session: Session): string | undefined {
+        const error = session.grant?.response?.error
+        const guildId = session.grant?.response?.raw?.guild?.id;
+        if (!error && guildId) {
+            return guildId
+        } else {
+            log.warn("Unable to get joined server", session.grant?.response)
+            return undefined
         }
     }
 }
