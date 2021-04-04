@@ -1,4 +1,4 @@
-import {Container} from "theme-ui";
+import {Box, Container} from "theme-ui";
 import React, {useState} from "react";
 import {SocketContext, socket} from "./context/socket";
 import {ChannelContext} from "./context/channel"
@@ -25,15 +25,17 @@ const App = () => {
             <ChannelContext.Provider value={{channelID, setSelectedChannel}}>
                 <UIContext.Provider value={{editing, setEditing}}>
                     <Theme>
-                        {selectedServer.groupId
-                            ? <Container>
-                                <Container p={4}>
-                                    <SoundBoard/>
+                        <Box id="app-root">
+                            {selectedServer.groupId
+                                ? <Container>
+                                    <Container p={4}>
+                                        <SoundBoard/>
+                                    </Container>
+                                    <StatusBar group={selectedServer} setSelectedServer={onSelectedServer}/>
                                 </Container>
-                                <StatusBar group={selectedServer} setSelectedServer={onSelectedServer}/>
-                            </Container>
-                            : <ServerSelector setSelectedServer={onSelectedServer}/>
-                        }
+                                : <ServerSelector setSelectedServer={onSelectedServer}/>
+                            }
+                        </Box>
                     </Theme>
                 </UIContext.Provider>
             </ChannelContext.Provider>

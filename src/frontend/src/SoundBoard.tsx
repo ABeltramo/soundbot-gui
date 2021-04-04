@@ -11,24 +11,20 @@ interface SongElement {
     channelID: string,
 
     updateSong(originalSong: SoundData, updatedSong: SoundData): void
+
+    deleteSong(song: SoundData): void
 }
 
 const SongButton = ({name, filename, onClick}: { name: string, filename: string, onClick(): void }) => {
     return (
         <Button variant="threeD" p={3} onClick={onClick}>
-            <Heading sx={{
-                color: "text",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                whiteSpace: "nowrap"
-            }}>{name}</Heading>
-
-            <Text sx={{color: "muted", fontSize: 1}}>{filename}</Text>
+            <Heading className="text-ellipsis" sx={{color: "text"}}>{name}</Heading>
+            <Text className="text-ellipsis" sx={{color: "muted", fontSize: 1}}>{filename}</Text>
         </Button>
     )
 }
 
-const SongUpdateBox = ({updateSong, soundData}: SongElement) => {
+const SongUpdateBox = ({updateSong, soundData, deleteSong}: SongElement) => {
     return (
         <Box
             p={3}
@@ -43,7 +39,8 @@ const SongUpdateBox = ({updateSong, soundData}: SongElement) => {
                     updateSong(soundData, newData)
                 }}
                 value={soundData.name}/>
-            <Text sx={{color: "muted"}}>{soundData.filename}</Text>
+            <Text as="h5" className="text-ellipsis" sx={{color: "muted"}}>{soundData.filename}</Text>
+            <Button variant="danger" onClick={() => deleteSong(soundData)}>Delete</Button>
         </Box>
     )
 }
@@ -87,22 +84,36 @@ const SoundBoard = () => {
         socket.emit("songs:update!", originalSong, updatedSong)
     }
 
+    const handleSongAdded = (song: SoundData) => {
+        setSongs(prevState => [...prevState, song])
+    }
+
+    const handleDeleteSong = (song: SoundData) => {
+        setSongs(prevState => {
+            return prevState.filter((element) => song !== element)
+        })
+        socket.emit("songs:remove!", song)
+    }
+
     useEffect(() => {
         socket.emit("songs:get?", {})
         socket.on("songs:get!", handleSongsRetrieved)
+        socket.on("songs:create!", (s) => handleSongAdded(s))
         return () => {
-            socket.off("songs:get!", handleSongsRetrieved)
+            socket.off("songs:get!")
+            socket.off("songs:create!")
         }
     }, [socket])
 
     return (
-        <Grid columns={[2, 3, 4, 5]}>
+        <Grid columns={[2, 3, 4, 5]} sx={{marginBottom: "50px"}}>
             {songs.map((song: SoundData) => {
                 return <SongBox
                     key={song.filename}
                     editing={editing}
                     soundData={song}
                     updateSong={updateSong}
+                    deleteSong={handleDeleteSong}
                     channelID={channelID}/>
             })}
         </Grid>

@@ -8,17 +8,22 @@ import {GroupData} from "../common/serverInterface";
 
 emitter.on("sounds:get:sound-file", getSoundFile)
 emitter.on("servers:joined", initAndImportSoundFiles)
+emitter.on("sounds:remove", removeSoundFile)
 
 const baseFolder = path.resolve(env.SOUNDS_FOLDER);
 
-export function getSoundFile({groupId, filename}: SoundData): string {
+function getSoundFile({groupId, filename}: SoundData): string {
     return path.join(baseFolder, groupId, filename);
+}
+
+function removeSoundFile(sound : SoundData): void {
+    fs.unlinkSync(getSoundFile(sound))
 }
 
 /**
  *  Will setup the sound folder if not present and import all from the folder if not present in the db already
  */
-export async function initAndImportSoundFiles({groupId}: GroupData) {
+async function initAndImportSoundFiles({groupId}: GroupData) {
     const baseIdPath = path.join(baseFolder, groupId)
     if (!fs.existsSync(baseIdPath)) {
         fs.mkdirSync(baseIdPath, {recursive: true});

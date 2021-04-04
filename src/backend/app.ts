@@ -6,6 +6,7 @@ import "./db/channels"
 import "./db/sounds"
 import "./sound-files"
 import "./sound-queue"
+import "./ytdl"
 import {emitter} from "./events"
 import {log} from "./helpers/log";
 import {env} from "./helpers/env";

@@ -32,6 +32,7 @@ const discord_colors = {
     secondary: '#4766dd',
     accent: '#660099',
     muted: '#35393e',
+    danger: '#9d0202'
 }
 
 const deep_colors = {
@@ -40,7 +41,8 @@ const deep_colors = {
     muted: "hsl(231,25%,21%)",
     primary: "hsl(261,55%,67%)",
     secondary: "hsl(267,32%,42%)",
-    text: "#fff"
+    text: "#fff",
+    danger: '#9d0202'
 }
 
 class ThemeComponent
@@ -54,8 +56,25 @@ class ThemeComponent
         const full_theme = merge(base_theme as Theme,
             {
                 buttons: {
+                    primary: {
+                        '&:disabled': {
+                            bg: "muted",
+                            border: theme => `1px solid ${theme.colors?.primary}`,
+                            color: "primary"
+                        }
+                    },
                     secondary: {
                         bg: "secondary"
+                    },
+                    danger: {
+                        bg: "none",
+                        color: "danger",
+                        border: theme => `1px solid ${theme.colors?.danger}`,
+
+                        '&:hover': {
+                            color: "text",
+                            "bg": "danger"
+                        }
                     },
                     threeD: {
                         border: theme => `1px solid ${theme.colors?.text}`,
@@ -77,6 +96,7 @@ class ThemeComponent
                     }
                 },
                 colors: {
+                    danger: '#ba0101',
                     modes: {
                         dark: discord_colors,
                         deep: deep_colors

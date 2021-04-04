@@ -18,8 +18,9 @@
     "socket.io-client": "^4.0.0",
     "theme-ui": "^0.6.0"
   },
+  "proxy" : "http://localhost:3000",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3001 react-scripts start",
     "watch": "cra-build-watch",
     "build": "react-scripts build",
     "test": "react-scripts test",

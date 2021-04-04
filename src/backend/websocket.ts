@@ -5,6 +5,8 @@ import {emitter} from "./events";
 import Oauth from "./discord/oauth";
 import {Session} from "express-session";
 import {ResolvedGroup} from "../common/serverInterface";
+import {SoundData} from "../common/soundInterface";
+import {YTData} from "../common/ytInterface";
 
 export default class Websocket {
     private io: Server;
@@ -60,6 +62,27 @@ export default class Websocket {
             }
         })
 
+        ws.on("songs:update!", (original: SoundData, updated: SoundData) => {
+            const groupId = Websocket.getSelectedGroupId(ws)
+            if (original.groupId === groupId && updated.groupId === groupId) {
+                emitter.emit("sounds:update", original, updated)
+            }
+        })
+
+        ws.on("songs:remove!", (song: SoundData) => {
+            const groupId = Websocket.getSelectedGroupId(ws)
+            if(song.groupId === groupId){
+                emitter.emit("sounds:remove", song)
+            }
+        })
+
+        emitter.on("sounds:create", (sound: SoundData) => {
+            const groupId = Websocket.getSelectedGroupId(ws)
+            if (sound.groupId === groupId) {
+                ws.emit("songs:create!", sound)
+            }
+        })
+
         ws.on("channels:get?", async () => {
             const groupId = Websocket.getSelectedGroupId(ws)
             if (groupId) {
@@ -76,6 +99,29 @@ export default class Websocket {
                     channelId: channelID,
                     name: "" // TODO
                 })
+            }
+        })
+
+        ws.on("download:yt?", async (name: string, ytData: YTData) => {
+            const groupId = Websocket.getSelectedGroupId(ws)
+            if (groupId) {
+
+                // validate input
+                if (!name || name.length === 0 || !ytData.url || ytData.url.length === 0) {
+                    ws.emit("download:yt!", {error: true, msg: "Fill name and url fields"})
+                    return
+                }
+
+                const [, result] = await emitter.emitAsync("download:yt", {
+                    groupId,
+                    name,
+                }, ytData)
+
+                if (!result) {
+                    ws.emit("download:yt!", {error: true, msg: "Error during downloading, please try again later."})
+                } else {
+                    ws.emit("download:yt!", result)
+                }
             }
         })
     }

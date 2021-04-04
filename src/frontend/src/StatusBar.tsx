@@ -8,6 +8,8 @@ import {ChannelContext} from "./context/channel";
 import {UIContext} from "./context/ui";
 import {GroupRowProps} from "./ServerSelector";
 import {ResolvedGroup} from "../../common/serverInterface";
+import Modal from "./components/Modal";
+import YTDL from "./YTDL";
 
 const ChannelSelector = (props: SelectProps) => {
     const {channelID, setSelectedChannel} = useContext(ChannelContext);
@@ -62,6 +64,8 @@ const EditMode = (props: ButtonProps) => {
 }
 
 const StatusBar = ({setSelectedServer, group}: GroupRowProps) => {
+    const [modalOpen, setModalOpen] = useState(false);
+
     return (
         <Flex
             sx={{
@@ -78,9 +82,15 @@ const StatusBar = ({setSelectedServer, group}: GroupRowProps) => {
             </Flex>
             <Box sx={{flex: 1}}/>
             <Flex sx={{flex: 1, justifyContent: "flex-end"}}>
+                <Button variant="outlined" sx={{marginLeft: "5px"}} onClick={() => setModalOpen(true)}>
+                    new
+                </Button>
                 <EditMode variant="outlined" sx={{marginLeft: "5px"}}/>
                 <ThemeSelector variant="outlined" sx={{marginLeft: "5px"}}/>
             </Flex>
+            <Modal open={modalOpen} setOpen={setModalOpen}>
+                <YTDL setOpen={setModalOpen}/>
+            </Modal>
         </Flex>
     )
 }

@@ -18,11 +18,7 @@ const GroupRow = ({group, setSelectedServer}: GroupRowProps) => {
             maxWidth: "400px"
         }}>
             <Avatar src={group.icon ? `${group.icon}?size=128` : "/undefined.png"}/>
-            <Text sx={{
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                whiteSpace: "nowrap"
-            }}>{group.groupName}</Text>
+            <Text className="text-ellipsis">{group.groupName}</Text>
             {group.channels.length > 0
                 ? <Button
                     sx={{width: "90px"}}
