@@ -7,12 +7,13 @@ A soundboard UI and a bot!
 ## Running
 
 ```
-docker run abeltramo/soundbot-gui \
+docker run \
     --name soundbot-gui \
     --port 3000:3000
     --env BOT_TOKEN=abcdefgh... \
     --env OAUTH_KEY=0123456789... \
-    --env OAUTH_SECRET=abcdefgh...
+    --env OAUTH_SECRET=abcdefgh... \
+    ghcr.io/abeltramo/soundbot-gui
 ```
 
 ## Env variables
