@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: dev.Dockerfile
+    image: abeltramo/soundbot-gui:dev
+    command: sh -c "
+      cd /app/ &&
+      npm install &&
+      npm run watch"
+    volumes: 
+      - ./:/app
+      - data:/data
+    ports:
+      - 3000:3000
+    environment: 
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      BOT_TOKEN: ${BOT_TOKEN}
+      OAUTH_KEY: ${OAUTH_KEY}
+      OAUTH_SECRET: ${OAUTH_SECRET}
+      SOUNDS_FOLDER: /data/sounds
+      DB_SQLITE_FILENAME: '/data/db.sqlite'
+
+  
+  frontend:
+    build: 
+      context: .
+      dockerfile: dev.Dockerfile
+    image: abeltramo/soundbot-gui:dev
+    command: sh -c "
+      cd /app/src/frontend &&
+      npm install --production=false && 
+      npm run watch"
+    volumes: 
+      - ./:/app
+    environment: 
+      NODE_ENV: "development"
+
+volumes:
+  data:

@@ -108,3 +108,7 @@ conf.env
 
 data/
 .DS_Store
+
+# .env will store dev secrets, we don't want it to be pushed to Github
+.env
+.vscode

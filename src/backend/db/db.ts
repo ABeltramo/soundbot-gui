@@ -14,6 +14,7 @@ const connections = {
     }
 }
 
+
 export const connSetting = {
     client: env.DB_CLIENT,
     // @ts-ignore
@@ -36,3 +37,5 @@ export const connSetting = {
 }
 
 export const knex = Knex(connSetting)
+// Apply migrations on startup
+knex.migrate.latest()
