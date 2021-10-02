@@ -23,6 +23,5 @@ jobs:
       - run: |
           mkdir data && touch data/db.sqlite
           npm install knex -g
-          knex init
-          knex migrate:latest
+          knex migrate:latest -x ts
       - run: npm run test
