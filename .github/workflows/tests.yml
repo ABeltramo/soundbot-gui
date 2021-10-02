@@ -12,6 +12,7 @@ jobs:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       OAUTH_KEY: ${{ secrets.OAUTH_KEY }}
       OAUTH_SECRET: ${{ secrets.OAUTH_SECRET }}
+      NODE_ENV: development
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -19,5 +20,9 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - run: npm install
-      - run: mkdir data && touch data/db.sqlite
+      - run: |
+          mkdir data && touch data/db.sqlite
+          npm install knex -g
+          knex init
+          knex migrate:latest
       - run: npm run test
