@@ -5,7 +5,7 @@ services:
     build: 
       context: .
       dockerfile: dev.Dockerfile
-    image: abeltramo/soundbot-gui:dev
+    image: ghcr.io/abeltramo/soundbot-gui:dev
     command: sh -c "
       cd /app/ &&
       npm install &&
@@ -29,7 +29,7 @@ services:
     build: 
       context: .
       dockerfile: dev.Dockerfile
-    image: abeltramo/soundbot-gui:dev
+    image: ghcr.io/abeltramo/soundbot-gui:dev
     command: sh -c "
       cd /app/src/frontend &&
       npm install --production=false && 

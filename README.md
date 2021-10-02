@@ -7,19 +7,20 @@ A soundboard UI and a bot!
 ## Running
 
 ```
-docker run abeltramo/soundbot-gui \
+docker run \
     --name soundbot-gui \
     --port 3000:3000
     --env BOT_TOKEN=abcdefgh... \
     --env OAUTH_KEY=0123456789... \
-    --env OAUTH_SECRET=abcdefgh...
+    --env OAUTH_SECRET=abcdefgh... \
+    ghcr.io/abeltramo/soundbot-gui
 ```
 
 ## Env variables
 
 **TODO: to markdown**
 
-```json
+```typescript
 {
     LOG_LEVEL: {
         type: String,
@@ -97,4 +98,12 @@ Run it using
 ```
 docker-compose build
 docker-compose up
+```
+
+## Run tests:
+
+If you don't have a DB already the first time it'll fail running the migrations.
+
+```
+docker run --env-file .env -e NODE_ENV=dev -v ${PWD}:/app -it ghcr.io/abeltramo/soundbot-gui sh -c 'npm install && npm run test'
 ```
