@@ -10,6 +10,7 @@
 !tsconfig.json
 !.eslintignore
 !.eslintrc.js
+!knexfile.ts
 
 # Frontend stuff
 src/frontend/node_modules
