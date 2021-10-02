@@ -99,3 +99,9 @@ Run it using
 docker-compose build
 docker-compose up
 ```
+
+## Run tests:
+
+```
+docker run --env-file .env -v ${PWD}:/app -it ghcr.io/abeltramo/soundbot-gui npm run test
+```
