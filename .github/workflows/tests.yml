@@ -8,6 +8,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      OAUTH_KEY: ${{ secrets.OAUTH_KEY }}
+      OAUTH_SECRET: ${{ secrets.OAUTH_SECRET }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

@@ -20,7 +20,7 @@ docker run \
 
 **TODO: to markdown**
 
-```json
+```typescript
 {
     LOG_LEVEL: {
         type: String,
