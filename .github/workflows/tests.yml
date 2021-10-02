@@ -20,8 +20,8 @@ jobs:
           node-version: '16'
           cache: 'npm'
       - run: npm install
-      - run: |
-          mkdir data && touch data/db.sqlite
-          npm install knex -g
-          knex migrate:latest
+      # First it'll fail in order to create the migrations
+      # TODO: fix this
+      - run: npm run test
+        continue-on-error: true
       - run: npm run test
