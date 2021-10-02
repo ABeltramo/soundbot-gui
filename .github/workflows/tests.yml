@@ -19,7 +19,10 @@ jobs:
         with:
           node-version: '16'
           cache: 'npm'
-      - run: npm install
+      - run: |
+          npm install
+          mkdir data
+          touch data/db.sqlite
       # First it'll fail in order to create the migrations
       # TODO: fix this
       - run: npm run test
