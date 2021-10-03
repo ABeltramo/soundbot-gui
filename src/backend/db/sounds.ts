@@ -1,6 +1,6 @@
-import {knex} from "./db"
-import {SoundData} from "../../common/soundInterface";
-import {emitter} from "../events";
+import { knex } from "./db"
+import { SoundData } from "../../common/soundInterface";
+import { emitter } from "../events";
 
 emitter.on("sounds:create", setSoundData)
 emitter.on("sounds:get:by-group", getSounds)
@@ -20,6 +20,22 @@ export async function getSoundData(groupId: string, filename: string): Promise<S
         .where("groupId", groupId)
         .andWhere("filename", filename)
         .first()
+}
+
+export async function getSoundById(soundId: number): Promise<SoundData | undefined> {
+    return knex<SoundData>('sounds')
+        .select("groupId", "filename", "name")
+        .where("id", soundId)
+        .first()
+}
+
+export async function getSoundsId(sound: SoundData): Promise<number | undefined> {
+    return knex('sounds')
+        .select("id")
+        .where("groupId", sound.groupId)
+        .andWhere("filename", sound.filename)
+        .first()
+        .then(sound => sound.id)
 }
 
 export async function setSoundData(sound: SoundData): Promise<SoundData> {

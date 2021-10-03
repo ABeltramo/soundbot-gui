@@ -4,6 +4,7 @@ import Websocket from "./websocket";
 import {DiscordBot} from "./discord/bot";
 import "./db/channels"
 import "./db/sounds"
+import "./db/users"
 import "./sound-files"
 import "./sound-queue"
 import "./ytdl"
