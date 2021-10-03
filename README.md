@@ -105,5 +105,5 @@ docker-compose up
 If you don't have a DB already the first time it'll fail running the migrations.
 
 ```
-docker run --env-file .env -e NODE_ENV=dev -v ${PWD}:/app -it ghcr.io/abeltramo/soundbot-gui sh -c 'npm install && npm run test'
+docker run --rm --env-file .env -e NODE_ENV=dev -v ${PWD}:/app -it ghcr.io/abeltramo/soundbot-gui sh -c 'npm install && npm run test'
 ```
