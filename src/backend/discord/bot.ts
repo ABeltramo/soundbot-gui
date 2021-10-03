@@ -47,11 +47,11 @@ export class DiscordBot {
                     const member = await this.memberToUser(groupId, newState.member)
                     const channel = {
                         groupId: groupId,
-                        channelId: newState.channelID,
+                        channelId: newState.channelID ? newState.channelID : oldState.channelID,
                         name: "" // TODO
                     }
-                    const isEntering = oldState.channel !== newState.channel && newState.channel !== undefined
-                    const isLeaving = oldState.channel !== newState.channel && oldState.channel !== undefined
+                    const isEntering = oldState.channelID !== newState.channelID && newState.channelID !== null && oldState.channelID == null
+                    const isLeaving = oldState.channelID !== newState.channelID && oldState.channelID !== null && newState.channelID == null
                     if (isEntering && member.enterSound !== undefined) {
                         emitter.emitAsync("sound:play", member.enterSound, channel)
                     } else if (isLeaving && member.leaveSound !== undefined) {
