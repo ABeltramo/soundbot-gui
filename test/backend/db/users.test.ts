@@ -80,7 +80,7 @@ test('set/update users in DB', async () => {
     expect(await users.getUserData(user.groupId, user.userId))
         .toEqual(updatedUser)
 
-    await users.removeUserData(updatedUser)
+    await users.removeUserData(updatedUser.groupId, updatedUser.userId)
     expect(await users.getUserData(user.groupId, user.userId))
         .toBeUndefined()
 })

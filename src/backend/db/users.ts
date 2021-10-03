@@ -71,10 +71,10 @@ export async function setUserData(User: UserData): Promise<UserData> {
     return User
 }
 
-export async function removeUserData(User: UserData) {
+export async function removeUserData(groupId: string, userId: string) {
     return knex<UserDataDB>('Users')
-        .where("groupId", User.groupId)
-        .andWhere("userId", User.userId)
+        .where("groupId", groupId)
+        .andWhere("userId", userId)
         .delete()
 }
 

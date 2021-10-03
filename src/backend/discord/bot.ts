@@ -6,7 +6,6 @@ import { SoundData } from "../../common/soundInterface";
 import { emitter } from "../events";
 import { GroupData } from "../../common/serverInterface";
 import { UserData } from "src/common/userInterface";
-import e from "cors";
 
 export class DiscordBot {
 
@@ -17,7 +16,9 @@ export class DiscordBot {
         this.client
             .on('ready', () => {
                 log.info("Discord bot online")
-            }).on("channelCreate", async (channel) => {
+            })
+            // Channels
+            .on("channelCreate", async (channel) => {
                 if (channel.type === "voice") {
                     emitter.emit("channel:create", DiscordBot.channelToData(channel))
                 }
@@ -29,7 +30,38 @@ export class DiscordBot {
                 if (prevChannel.type === "voice") {
                     emitter.emit("channel:update", DiscordBot.channelToData(prevChannel), DiscordBot.channelToData(newChannel))
                 }
-            }).on("debug", (e) => log.silly(e))
+            })
+            // Users
+            .on('guildMemberAdd', async member => {
+                log.debug(`${member.displayName} is joining the party @ ${member.guild.name}`)
+                const groupId = member.guild.id
+                const pmember = this.memberToUser(groupId, member)
+                const [, usersDB]: Array<UserData[]> = await emitter.emitAsync("users:get:by-group", groupId)
+                this.addOrUpdateUser(usersDB, pmember)
+            }).on('guildMemberRemove', async member => {
+                log.debug(`${member.displayName} is leaving the group ${member.guild.name}`)
+                emitter.emitAsync("users:remove", member.guild.id, member.id)
+            }).on('voiceStateUpdate', async (oldState, newState) => {
+                const groupId = newState.guild.id
+                if (newState.member !== null) {
+                    const member = await this.memberToUser(groupId, newState.member)
+                    const channel = {
+                        groupId: groupId,
+                        channelId: newState.channelID,
+                        name: "" // TODO
+                    }
+                    const isEntering = oldState.channel !== newState.channel && newState.channel !== undefined
+                    const isLeaving = oldState.channel !== newState.channel && oldState.channel !== undefined
+                    if (isEntering && member.enterSound !== undefined) {
+                        emitter.emitAsync("sound:play", member.enterSound, channel)
+                    } else if (isLeaving && member.leaveSound !== undefined) {
+                        emitter.emitAsync("sound:play", member.enterSound, channel)
+                    }
+                    log.debug(`Voice state update:`, { entering: isEntering, leaving: isLeaving, member: member, channel: channel })
+                }
+            })
+            // Logging
+            .on("debug", (e) => log.silly(e))
             .on("warn", (e) => log.warn(e))
             .on("error", (e) => log.error(e))
 
@@ -139,23 +171,25 @@ export class DiscordBot {
         const remoteMembers = await guild.members.fetch() // THIS NEEDS THE FLAG "Server Members Intent" in the developer setting page
         const members = remoteMembers.map(m => this.memberToUser(groupId, m))
         const [, usersDB]: Array<UserData[]> = await emitter.emitAsync("users:get:by-group", groupId)
-        const updatedMembers = members.map(async (pMember) => {
-            const remoteMember = await pMember;
-            const cachedUser = usersDB.find(user => user.userId == remoteMember.userId)
-            if (cachedUser == undefined) {
-                await emitter.emitAsync("users:create", remoteMember)
-                return remoteMember
-            } else {
-                remoteMember.enterSound = cachedUser.enterSound
-                remoteMember.leaveSound = cachedUser.leaveSound
-                const [, updatedMember]: Array<UserData> = await emitter.emitAsync("users:update", cachedUser, remoteMember)
-                return updatedMember
-            }
-        })
+        const updatedMembers = members.map(pmember => this.addOrUpdateUser(usersDB, pmember))
         // TODO: delete users that are not present anymore
         const fullMembers = await Promise.all(updatedMembers)
         log.debug(`Fetched members for ${groupId}:`, fullMembers)
         return fullMembers
+    }
+
+    public async addOrUpdateUser(usersDB: UserData[], pMember: Promise<UserData>) {
+        const remoteMember = await pMember;
+        const cachedUser = usersDB.find(user => user.userId == remoteMember.userId)
+        if (cachedUser == undefined) {
+            await emitter.emitAsync("users:create", remoteMember)
+            return remoteMember
+        } else {
+            remoteMember.enterSound = cachedUser.enterSound
+            remoteMember.leaveSound = cachedUser.leaveSound
+            const [, updatedMember]: Array<UserData> = await emitter.emitAsync("users:update", cachedUser, remoteMember)
+            return updatedMember
+        }
     }
 
     /**
